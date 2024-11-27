@@ -1,36 +1,31 @@
-# Message Scheduling Service
+# Message Echo Service
 
-## About
-The Message Scheduling Service is a robust, distributed system designed to handle time-based message processing at scale. It allows users to schedule messages for future delivery and processes them efficiently using a combination of Redis-based queuing and multi-threaded execution.
+## Problem Statement
+A server application that schedules messages for future delivery with a single API endpoint. Messages are stored in Redis and printed to the console at specified times.
 
-### What it does
-This service acts as a time-aware message processor that enables you to:
-- Schedule messages for future processing with precise timing
-- Handle large volumes of scheduled messages efficiently
-- Process messages in a distributed, thread-safe manner
-- Monitor and track message processing through comprehensive logging
+### Key Requirements
+- Single API endpoint `/echoAtTime` accepting time and message parameters
+- Messages persist through server restarts using Redis
+- Support multiple servers behind a load balancer
+- Process delayed messages after server recovery
+- Handle high message volumes efficiently
+- Ensure exactly-once message delivery
+- Scalable architecture
 
-### Key Benefits
-- **Reliable Delivery**: Uses distributed locking and retry mechanisms to ensure messages are processed exactly once
-- **Scalable Architecture**: Employs batch processing and thread pooling to handle high message volumes
-- **Fault Tolerance**: Implements exponential backoff and automatic error recovery
-- **Monitoring**: Provides detailed logging and health checks for operational visibility
+## Technical Architecture
 
-### Use Cases
-- Scheduled notifications and reminders
-- Delayed job processing
-- Time-based workflow automation
-- Scheduled data processing tasks
-- Message queuing and distribution
+### Components
+- **Flask API**: REST endpoint for scheduling messages
+- **Redis**: Message persistence and distributed queue
+- **Scheduler**: Multi-threaded message processor
+- **Docker**: Containerized deployment
 
-## Features
-- Message scheduling with Redis queue
-- Multi-threaded message processing
-- RESTful API with Swagger documentation
-- Dockerized deployment
-- Automated testing
-
-[Rest of the README remains the same...]
+### Key Features
+- Distributed locking for exactly-once processing
+- Batch message processing
+- Automatic retry mechanism
+- Health monitoring
+- Comprehensive logging
 
 ## Prerequisites
 - Docker and Docker Compose
@@ -42,21 +37,36 @@ This service acts as a time-aware message processor that enables you to:
 # Clone the repository
 git clone [repository-url]
 
-# Start the services
+# Start services
 docker-compose up -d
 
-# Access the API documentation
+# Access API documentation
 http://localhost:3000/docs
 ```
 
-## Architecture
-- **Flask API**: Handles HTTP requests and message scheduling
-- **Redis**: Message queue and data storage
-- **Scheduler**: Background worker processing scheduled messages
-- **Logger**: Rotating log files with compression
+## API Documentation
+
+### POST /echoAtTime
+Schedule a message for future delivery.
+
+**Parameters:**
+- `time`: Future timestamp when message should be printed
+- `message`: Text to be printed at specified time
+
+## Message Processing
+- Thread pool (10 workers default)
+- Batch processing (100 messages/batch)
+- Exponential backoff retry
+- Distributed locking for exactly-once delivery
+
+## Docker Setup
+- Redis container with persistent storage
+- Application container with live reload
+- Test container
+- Shared network between services
 
 ## Configuration
-Configuration is loaded from `appsettings.json`:
+`appsettings.json`:
 ```json
 {
   "Redis": {
@@ -65,10 +75,12 @@ Configuration is loaded from `appsettings.json`:
 }
 ```
 
-## API Endpoints
-- `/echoAtTime`: Schedule messages
-- `/health`: Service health check
-- `/docs`: Swagger UI documentation
+## Logging
+- Location: `logs` directory
+- Daily rotation
+- ZIP compression
+- ISO timestamp format
+- Error tracking
 
 ## Development
 ```bash
@@ -79,27 +91,26 @@ docker-compose run test
 cd logs
 ```
 
-## Message Processing
-Messages are processed with:
-- Configurable thread pool (default: 10 workers)
-- Batch processing (default: 100 messages)
-- Exponential backoff retry mechanism
-- Distributed locking for message processing
+## Technical Considerations
+1. Redis used for:
+   - Message queue
+   - Distributed locking
+   - Message persistence
 
-## Docker Support
-- Redis container with persistent storage
-- Application container with live reload
-- Separate test container
-- Shared network for service communication
+2. Scalability features:
+   - Multi-threading
+   - Batch processing
+   - Load balancer support
+   - Distributed architecture
 
-## Logging
-Logs are stored in the `logs` directory with:
-- Daily rotation
-- ZIP compression
-- ISO timestamp formatting
-- Detailed error tracking
+3. Reliability:
+   - Message persistence
+   - Retry mechanism
+   - Server restart recovery
+   - Exactly-once delivery
 
 ## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+1. Fork repository
+2. Create feature branch
+3. Submit pull request
+
